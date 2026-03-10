@@ -107,4 +107,4 @@ src/c3_invoke/
 
 ## Part of C3 Ecosystem
 
-C3 Invoke is a standalone package in the [C3 organization](https://github.com/C3) ecosystem. See the [C3 Architecture Overview](https://github.com/C3/job-compass/blob/main/docs/C3-ORGANIZATION.md) for how it fits with Job Compass and C3 CLI Desktop.
+C3 Invoke is a standalone package in the [C3 organization](https://github.com/CodeCanvasCollective) ecosystem. C3 Architecture Overview will be available soon.
