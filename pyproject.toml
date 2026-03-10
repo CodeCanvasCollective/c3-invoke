@@ -1,0 +1,46 @@
+[project]
+name = "c3-invoke"
+version = "0.1.0"
+description = "Unified interface to AI CLIs (Gemini, Claude, Codex) from Python or HTTP"
+requires-python = ">=3.11"
+license = "MIT"
+readme = "README.md"
+authors = [{ name = "CodeCanvas Collective", email = "hello@codecanvascollective.com" }]
+keywords = ["ai", "cli", "gemini", "claude", "codex", "llm"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/CodeCanvasCollective/c3-invoke"
+Repository = "https://github.com/CodeCanvasCollective/c3-invoke"
+Issues = "https://github.com/CodeCanvasCollective/c3-invoke/issues"
+
+[project.optional-dependencies]
+server = ["fastapi>=0.115.0", "uvicorn[standard]>=0.30.0"]
+dev = ["pytest>=8.0.0", "pytest-asyncio>=0.24.0", "httpx>=0.27.0"]
+all = ["c3-invoke[server,dev]"]
+
+[project.scripts]
+c3-invoke-server = "c3_invoke.server.main:main"
+
+[project.entry-points."c3.products"]
+c3-invoke = "c3_invoke.server:product_info"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/c3_invoke"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
