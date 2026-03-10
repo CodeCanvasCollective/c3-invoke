@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version_suffix:
-        description: "Version suffix (e.g. dev1, rc1). Leave empty to use pyproject.toml version as-is."
+        description: "PEP 440 version suffix (e.g. .dev1, rc1, a1, b1). Leave empty to use pyproject.toml version as-is."
         required: false
         default: ""
 
@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5.6.0
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -34,7 +34,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5.6.0
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
 
@@ -44,7 +44,7 @@ jobs:
       - name: Append version suffix
         if: ${{ inputs.version_suffix != '' }}
         run: |
-          sed -i "s/^version = \"\\(.*\\)\"/version = \"\\1.${{ inputs.version_suffix }}\"/" pyproject.toml
+          sed -i "s/^version = \"\\(.*\\)\"/version = \"\\1${{ inputs.version_suffix }}\"/" pyproject.toml
           echo "Updated version to:"
           grep '^version' pyproject.toml
 
@@ -57,7 +57,7 @@ jobs:
           python -c "from c3_invoke import get_provider, list_providers; print('Import OK')"
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4.6.2
+        uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist/
@@ -70,7 +70,7 @@ jobs:
       id-token: write
     steps:
       - name: Download build artifacts
-        uses: actions/download-artifact@v4.3.0
+        uses: actions/download-artifact@v8
         with:
           name: dist
           path: dist/
