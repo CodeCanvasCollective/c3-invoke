@@ -1,0 +1,87 @@
+name: Test Publish to TestPyPI
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_suffix:
+        description: "Version suffix (e.g. dev1, rc1). Leave empty to use pyproject.toml version as-is."
+        required: false
+        default: ""
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install package with dev dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Run tests
+        run: pytest tests/ -v
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install build tools
+        run: pip install build
+
+      - name: Append version suffix
+        if: ${{ inputs.version_suffix != '' }}
+        run: |
+          sed -i "s/^version = \"\\(.*\\)\"/version = \"\\1.${{ inputs.version_suffix }}\"/" pyproject.toml
+          echo "Updated version to:"
+          grep '^version' pyproject.toml
+
+      - name: Build package
+        run: python -m build
+
+      - name: Verify wheel contents
+        run: |
+          pip install dist/*.whl
+          python -c "from c3_invoke import get_provider, list_providers; print('Import OK')"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: testpypi
+    permissions:
+      id-token: write
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+      - name: Verify installation from TestPyPI
+        run: |
+          sleep 15
+          pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ c3-invoke
+          python -c "from c3_invoke import get_provider, list_providers; print('TestPyPI install OK')"
